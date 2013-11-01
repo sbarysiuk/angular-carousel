@@ -1,6 +1,6 @@
 /**
  * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v0.0.9 - 2013-10-11
+ * @version v0.0.9 - 2013-11-01
  * @link http://revolunet.github.com/angular-carousel
  * @author Julien Bouquillon <julien@revolunet.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -29,10 +29,19 @@ angular.module('angular-carousel')
     replace: true,
     scope: {
       items: '=',
-      index: '='
+      index: '=',
+      delegate: '&'
+    },
+    controller : function($scope) {
+      $scope.setActive = function(item) {
+       var index = $scope.items.indexOf(item);
+       if (index !== $scope.index) {
+         $scope.delegate().setActive(index);
+       }
+      }
     },
     template: '<div class="rn-carousel-indicator">' +
-                '<span ng-repeat="item in items" ng-class="{active: $index==$parent.index}">●</span>' +
+                '<span ng-repeat="item in items" ng-click="setActive(item)" ng-class="{active: $index==$parent.index}">●</span>' +
               '</div>'
   };
 }]);
@@ -311,7 +320,10 @@ angular.module('angular-carousel')
 
         /* enable carousel indicator */
         if (angular.isDefined(iAttrs.rnCarouselIndicator)) {
-          var indicator = $compile("<div id='" + carouselId +"-indicator' index='carouselCollection.index' items='carouselCollection.items' data-rn-carousel-indicators class='rn-carousel-indicator'></div>")(scope);
+          scope.setActive = function(index) {
+            scope.carouselCollection.goToIndex(index, true);
+          };
+          var indicator = $compile("<div id='" + carouselId +"-indicator' index='carouselCollection.index' items='carouselCollection.items' delegate='this' data-rn-carousel-indicators class='rn-carousel-indicator'></div>")(scope);
           container.append(indicator);
         }
 
